@@ -3,6 +3,7 @@ import ipaddress
 from modules.vlan_manager import load_vlans
 from modules.device_manager import load_devices
 from modules.firewall_manager import load_firewall_rules
+from modules.switch_port_manager import load_switch_ports
 
 
 def run_integrity_check():
@@ -10,12 +11,18 @@ def run_integrity_check():
     vlans = load_vlans()
     devices = load_devices()
     rules = load_firewall_rules()
+    switch_ports = load_switch_ports()
 
     warnings = []
 
     vlan_lookup = {
         vlan["vlan_id"]: vlan
         for vlan in vlans
+    }
+
+    device_lookup = {
+        device["hostname"].lower(): device
+        for device in devices
     }
 
     # -------------------------
@@ -202,6 +209,141 @@ def run_integrity_check():
                 f"{', '.join(hostnames)}"
             )
 
+
+    # -------------------------
+    # Switch Port Checks
+    # -------------------------
+
+    used_switch_ports = {}
+
+    valid_switch_port_modes = [
+        "access",
+        "trunk",
+        "unused"
+    ]
+
+    for port in switch_ports:
+
+        switch_name = port["switch_name"]
+        port_id = port["port_id"]
+        mode = port["mode"]
+        connected_device = port["connected_device"]
+
+        port_key = (
+            switch_name.lower(),
+            port_id.lower()
+        )
+
+        if port_key not in used_switch_ports:
+            used_switch_ports[port_key] = []
+
+        used_switch_ports[port_key].append(
+            f"{switch_name} port {port_id}"
+        )
+
+        if mode not in valid_switch_port_modes:
+            warnings.append(
+                f"[WARNING] Switch port {switch_name} port {port_id} "
+                f"has invalid mode: {mode}"
+            )
+            continue
+
+        if connected_device and connected_device.lower() not in [
+            "none",
+            "n/a",
+            "spare",
+            "unused"
+        ]:
+            if connected_device.lower() not in device_lookup:
+                warnings.append(
+                    f"[WARNING] Switch port {switch_name} port {port_id} "
+                    f"references unknown device: {connected_device}"
+                )
+
+        if mode == "access":
+            access_vlan = port["access_vlan"]
+
+            if access_vlan not in vlan_lookup:
+                warnings.append(
+                    f"[WARNING] Switch port {switch_name} port {port_id} "
+                    f"references missing access VLAN {access_vlan}"
+                )
+
+            if port["native_vlan"] is not None:
+                warnings.append(
+                    f"[WARNING] Access port {switch_name} port {port_id} "
+                    f"should not have a native VLAN"
+                )
+
+            if port["allowed_vlans"]:
+                warnings.append(
+                    f"[WARNING] Access port {switch_name} port {port_id} "
+                    f"should not have allowed VLANs"
+                )
+
+        elif mode == "trunk":
+            native_vlan = port["native_vlan"]
+            allowed_vlans = port["allowed_vlans"]
+
+            if native_vlan not in vlan_lookup:
+                warnings.append(
+                    f"[WARNING] Trunk port {switch_name} port {port_id} "
+                    f"references missing native VLAN {native_vlan}"
+                )
+
+            if not allowed_vlans:
+                warnings.append(
+                    f"[WARNING] Trunk port {switch_name} port {port_id} "
+                    f"has no allowed VLANs"
+                )
+
+            for vlan_id in allowed_vlans:
+                if vlan_id not in vlan_lookup:
+                    warnings.append(
+                        f"[WARNING] Trunk port {switch_name} port {port_id} "
+                        f"references missing allowed VLAN {vlan_id}"
+                    )
+
+            if port["access_vlan"] is not None:
+                warnings.append(
+                    f"[WARNING] Trunk port {switch_name} port {port_id} "
+                    f"should not have an access VLAN"
+                )
+
+        elif mode == "unused":
+            assigned_vlan = port["assigned_vlan"]
+
+            if assigned_vlan not in vlan_lookup:
+                warnings.append(
+                    f"[WARNING] Unused port {switch_name} port {port_id} "
+                    f"references missing assigned VLAN {assigned_vlan}"
+                )
+
+            if port["access_vlan"] is not None:
+                warnings.append(
+                    f"[WARNING] Unused port {switch_name} port {port_id} "
+                    f"should not have an access VLAN"
+                )
+
+            if port["native_vlan"] is not None:
+                warnings.append(
+                    f"[WARNING] Unused port {switch_name} port {port_id} "
+                    f"should not have a native VLAN"
+                )
+
+            if port["allowed_vlans"]:
+                warnings.append(
+                    f"[WARNING] Unused port {switch_name} port {port_id} "
+                    f"should not have allowed VLANs"
+                )
+
+    for port_key, port_entries in used_switch_ports.items():
+        if len(port_entries) > 1:
+            warnings.append(
+                f"[WARNING] Duplicate switch port detected: "
+                f"{', '.join(port_entries)}"
+            )
+
     # -------------------------
     # Firewall Rule Checks
     # -------------------------
@@ -209,40 +351,37 @@ def run_integrity_check():
     valid_special_endpoints = ["internet", "any"]
 
     for rule in rules:
+        source = rule["source_vlan"]
+        destination = rule["destination_vlan"]
 
-        for rule in rules:
+        if (
+            source not in vlan_lookup
+            and source not in valid_special_endpoints
+        ):
+            warnings.append(
+                f"[WARNING] Firewall Rule "
+                f"{rule['rule_id']} references "
+                f"missing source VLAN "
+                f"{source}"
+            )
 
-            source = rule["source_vlan"]
-            destination = rule["destination_vlan"]
+        if (
+            destination not in vlan_lookup
+            and destination not in valid_special_endpoints
+        ):
+            warnings.append(
+                f"[WARNING] Firewall Rule "
+                f"{rule['rule_id']} references "
+                f"missing destination VLAN "
+                f"{destination}"
+            )
 
-            if (
-                source not in vlan_lookup
-                and source not in valid_special_endpoints
-            ):
-                warnings.append(
-                    f"[WARNING] Firewall Rule "
-                    f"{rule['rule_id']} references "
-                    f"missing source VLAN "
-                    f"{source}"
-                )
-
-            if (
-                destination not in vlan_lookup
-                and destination not in valid_special_endpoints
-            ):
-                warnings.append(
-                    f"[WARNING] Firewall Rule "
-                    f"{rule['rule_id']} references "
-                    f"missing destination VLAN "
-                    f"{destination}"
-                )
-
-            if source == destination:
-                warnings.append(
-                    f"[WARNING] Firewall Rule "
-                    f"{rule['rule_id']} has identical "
-                    f"source/destination endpoints"
-                )
+        if source == destination:
+            warnings.append(
+                f"[WARNING] Firewall Rule "
+                f"{rule['rule_id']} has identical "
+                f"source/destination endpoints"
+            )
 
     # -------------------------
     # Output Results

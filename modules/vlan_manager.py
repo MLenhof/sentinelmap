@@ -130,7 +130,7 @@ def vlan_exists(vlan_id):
     vlans = load_vlans()
 
     for vlan in vlans:
-        if int(vlan["vlan_id"] == vlan_id):
+        if vlan["vlan_id"] == vlan_id:
             return True
 
     return False

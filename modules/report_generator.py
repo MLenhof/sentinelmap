@@ -4,6 +4,7 @@ from modules.vlan_manager import load_vlans
 from modules.device_manager import load_devices
 from modules.firewall_manager import load_firewall_rules
 from datetime import datetime
+from modules.switch_port_manager import load_switch_ports
 
 
 REPORT_FILE = Path("reports/network_report.md")
@@ -25,6 +26,7 @@ def generate_markdown_report():
     vlans = load_vlans()
     devices = load_devices()
     rules = load_firewall_rules()
+    switch_ports = load_switch_ports()
 
     timestamp = datetime.now().strftime(
         "%Y-%m-%d %H:%M:%S"
@@ -65,6 +67,64 @@ def generate_markdown_report():
                 file.write(f"- Location: {device['location']}\n")
                 file.write(f"- Role: {device['role']}\n")
                 file.write(f"- Notes: {device['notes']}\n\n")
+
+        # Switch Port Section
+        file.write("## Switch Port Summary\n\n")
+
+        if not switch_ports:
+            file.write("No switch ports documented.\n\n")
+        else:
+            ports_by_switch = {}
+
+            for port in switch_ports:
+                switch_name = port["switch_name"]
+
+                if switch_name not in ports_by_switch:
+                    ports_by_switch[switch_name] = []
+
+                ports_by_switch[switch_name].append(port)
+
+            for switch_name, ports in ports_by_switch.items():
+                file.write(f"### Switch: {switch_name}\n\n")
+
+                for port in ports:
+                    file.write(f"#### Port {port['port_id']}\n")
+                    file.write(f"- Description: {port['description']}\n")
+                    file.write(f"- Mode: {port['mode']}\n")
+                    file.write(f"- Connected Device: {port['connected_device']}\n")
+                    file.write(f"- PoE Enabled: {port['poe_enabled']}\n")
+
+                    if port["mode"] == "access":
+                        vlan_name = get_vlan_name(vlans, port["access_vlan"])
+                        file.write(
+                            f"- Access VLAN: {port['access_vlan']} - {vlan_name}\n"
+                        )
+
+                    elif port["mode"] == "trunk":
+                        native_vlan_name = get_vlan_name(vlans, port["native_vlan"])
+                        file.write(
+                            f"- Native VLAN: {port['native_vlan']} - {native_vlan_name}\n"
+                        )
+
+                        allowed_vlan_details = []
+
+                        for vlan_id in port["allowed_vlans"]:
+                            vlan_name = get_vlan_name(vlans, vlan_id)
+                            allowed_vlan_details.append(
+                                f"{vlan_id} - {vlan_name}"
+                            )
+
+                        file.write(
+                            f"- Allowed VLANs: {', '.join(allowed_vlan_details)}\n"
+                        )
+
+                    elif port["mode"] == "unused":
+                        vlan_name = get_vlan_name(vlans, port["assigned_vlan"])
+                        file.write(
+                            f"- Assigned VLAN: {port['assigned_vlan']} - {vlan_name}\n"
+                        )
+
+                    file.write(f"- Notes: {port['notes']}\n\n")
 
         # Firewall Rule Section
         file.write("## Firewall Rules\n\n")

@@ -22,6 +22,13 @@ from modules.firewall_manager import (
     edit_firewall_rule,
     firewall_rule_exists
 )
+from modules.switch_port_manager import (
+    add_switch_port,
+    list_switch_ports,
+    delete_switch_port,
+    edit_switch_port,
+    load_switch_ports
+)
 from modules.traffic_analyzer import show_traffic_summary
 from modules.report_generator import generate_markdown_report
 from modules.integrity_checker import run_integrity_check
@@ -522,6 +529,116 @@ def get_new_hostname():
 
 
 
+def get_switch_port_mode():
+    valid_modes = ["access", "trunk", "unused"]
+
+    while True:
+        mode = input("Port mode (access/trunk/unused): ").lower()
+
+        if mode in valid_modes:
+            return mode
+
+        print("Invalid mode.")
+        print("Access = one VLAN only")
+        print("Trunk = carries multiple VLANs")
+        print("Unused = not currently connected, usually assigned to a safe parking VLAN")
+
+
+def get_poe_enabled():
+    while True:
+        poe_input = input("PoE enabled? (y/n): ").lower()
+
+        if poe_input == "y":
+            return True
+
+        if poe_input == "n":
+            return False
+
+        print("Invalid input. Please enter y or n.")
+
+
+def get_allowed_vlans():
+    while True:
+        vlan_input = input("Allowed VLAN IDs, comma-separated (example: 10,20,30): ")
+        vlan_ids = []
+        invalid_input = False
+
+        for value in vlan_input.split(","):
+            value = value.strip()
+
+            try:
+                vlan_id = int(value)
+            except ValueError:
+                print(f"Invalid VLAN ID: {value}")
+                invalid_input = True
+                break
+
+            if not vlan_exists(vlan_id):
+                print(f"VLAN {vlan_id} does not exist.")
+                list_vlan_summary()
+                invalid_input = True
+                break
+
+            vlan_ids.append(vlan_id)
+
+        if invalid_input:
+            continue
+
+        if not vlan_ids:
+            print("At least one allowed VLAN is required for a trunk port.")
+            continue
+
+        return vlan_ids
+
+
+def select_switch_port():
+    switch_ports = load_switch_ports()
+
+    if not switch_ports:
+        print("No switch ports available.")
+        return None
+
+    print("\nSelect a switch port")
+    print("-" * 40)
+
+    for index, switch_port in enumerate(switch_ports, start=1):
+        print(
+            f"{index}. {switch_port['switch_name']} "
+            f"port {switch_port['port_id']} "
+            f"({switch_port['mode']}) - "
+            f"{switch_port['description']}"
+        )
+
+    while True:
+        try:
+            user_input = input(
+                "Enter switch port number "
+                "(or Q to cancel): "
+            ).lower()
+
+            if user_input == "q":
+                return None
+
+            choice = int(user_input)
+
+            if 1 <= choice <= len(switch_ports):
+                return switch_ports[choice - 1]
+
+            print("Invalid selection. Choose a number from the list.")
+
+        except ValueError:
+            print("Invalid input. Please enter a number.")
+
+
+def get_switch_port_identity_to_delete():
+    switch_port = select_switch_port()
+
+    if switch_port is None:
+        return None
+
+    return switch_port["switch_name"], switch_port["port_id"]
+
+
 # -------------------------
 # Menu display functions
 # -------------------------
@@ -531,10 +648,11 @@ def show_main_menu():
     print("1. VLAN Management")
     print("2. Device Management")
     print("3. Firewall Rule Management")
-    print("4. Traffic Analysis")
-    print("5. Reports")
-    print("6. Data Integrity Check")
-    print("7. Exit")
+    print("4. Switch Port Management")
+    print("5. Traffic Analysis")
+    print("6. Reports")
+    print("7. Data Integrity Check")
+    print("8. Exit")
 
 
 def show_vlan_menu():
@@ -561,6 +679,15 @@ def show_firewall_menu():
     print("2. List Firewall Rules")
     print("3. Edit Firewall Rule")
     print("4. Delete Firewall Rule")
+    print("5. Back")
+
+
+def show_switch_port_menu():
+    print("\nSwitch Port Management")
+    print("1. Add Switch Port")
+    print("2. List Switch Ports")
+    print("3. Edit Switch Port")
+    print("4. Delete Switch Port")
     print("5. Back")
 
 
@@ -897,6 +1024,201 @@ def firewall_menu():
             print("Invalid option. Please try again.")
 
 
+def switch_port_menu():
+    while True:
+        show_switch_port_menu()
+        choice = input("Choose an option: ")
+
+        if choice == "1":
+            switch_name = input("Switch name (example: tp-link-sg2008p): ")
+            
+            while True:
+            
+                port_id = input("Port ID/number (example: 1, 2, 3): ")
+                description = input("Description (example: Uplink to firewall): ")
+                mode = get_switch_port_mode()
+                connected_device = input("Connected device hostname/name (or leave blank): ")
+                
+                devices = load_devices()
+                
+                device_names = [device["hostname"] for device in devices]
+                
+                if connected_device and connected_device not in device_names:
+                    print("WARNING: Connected device not found in devices.json")
+                
+                poe_enabled = get_poe_enabled()
+
+                access_vlan = None
+                native_vlan = None
+                allowed_vlans = []
+                assigned_vlan = None
+
+                if mode == "access":
+                    print("\nAccess ports belong to exactly one VLAN.")
+                    access_vlan = get_existing_vlan_id()
+
+                    if access_vlan is None:
+                        print("Switch port was not added.")
+                        continue
+
+                elif mode == "trunk":
+                    print("\nTrunk ports carry multiple VLANs.")
+                    print("Native VLAN should usually be an unused/parking VLAN in this lab.")
+                    native_vlan = get_existing_vlan_id()
+
+                    if native_vlan is None:
+                        print("Switch port was not added.")
+                        continue
+
+                    allowed_vlans = get_allowed_vlans()
+
+                elif mode == "unused":
+                    print("\nUnused ports should be assigned to a safe parking VLAN, such as VLAN 90 BLACKHOLE.")
+                    assigned_vlan = get_existing_vlan_id()
+
+                    if assigned_vlan is None:
+                        print("Switch port was not added.")
+                        continue
+
+                notes = input("Notes (why is this port configured this way?): ")
+
+                add_switch_port(
+                    switch_name,
+                    port_id,
+                    description,
+                    mode,
+                    connected_device,
+                    poe_enabled,
+                    access_vlan,
+                    native_vlan,
+                    allowed_vlans,
+                    assigned_vlan,
+                    notes
+                )
+
+                another = input(
+                    f"Add another port to {switch_name}? (yes/no)" 
+                ).strip().lower()
+
+                if another != "yes":
+                    break
+
+        elif choice == "2":
+            list_switch_ports()
+
+        elif choice == "3":
+            switch_port = select_switch_port()
+
+            if switch_port is None:
+                continue
+
+            print(
+                f"\nEditing {switch_port['switch_name']} "
+                f"port {switch_port['port_id']}"
+            )
+            print("Leave a field blank to keep the current value.")
+            print("Mode editing is intentionally disabled for now.")
+
+            description = input(f"Description [{switch_port['description']}]: ")
+            connected_device = input(f"Connected device [{switch_port['connected_device']}]: ")
+            
+            devices = load_devices()
+            
+            device_names = [device["hostname"] for device in devices]
+            
+            if connected_device and connected_device not in device_names:
+                print("WARNING: Connected device not found in devices.json")
+
+            notes = input(f"Notes [{switch_port['notes']}]: ")
+
+            print(f"Current PoE enabled: {switch_port['poe_enabled']}")
+            change_poe = input("Change PoE setting? (y/n): ").lower()
+
+            if change_poe == "y":
+                poe_enabled = get_poe_enabled()
+            else:
+                poe_enabled = switch_port["poe_enabled"]
+
+            access_vlan = switch_port["access_vlan"]
+            native_vlan = switch_port["native_vlan"]
+            allowed_vlans = switch_port["allowed_vlans"]
+            assigned_vlan = switch_port["assigned_vlan"]
+
+            if switch_port["mode"] == "access":
+                print(f"Current access VLAN: {access_vlan}")
+                change_vlan = input("Change access VLAN? (y/n): ").lower()
+
+                if change_vlan == "y":
+                    access_vlan = get_existing_vlan_id()
+
+                    if access_vlan is None:
+                        print("Switch port was not updated.")
+                        continue
+
+            elif switch_port["mode"] == "trunk":
+                print(f"Current native VLAN: {native_vlan}")
+                change_native = input("Change native VLAN? (y/n): ").lower()
+
+                if change_native == "y":
+                    native_vlan = get_existing_vlan_id()
+
+                    if native_vlan is None:
+                        print("Switch port was not updated.")
+                        continue
+
+                print(f"Current allowed VLANs: {allowed_vlans}")
+                change_allowed = input("Change allowed VLANs? (y/n): ").lower()
+
+                if change_allowed == "y":
+                    allowed_vlans = get_allowed_vlans()
+
+            elif switch_port["mode"] == "unused":
+                print(f"Current assigned VLAN: {assigned_vlan}")
+                change_assigned = input("Change assigned VLAN? (y/n): ").lower()
+
+                if change_assigned == "y":
+                    assigned_vlan = get_existing_vlan_id()
+
+                    if assigned_vlan is None:
+                        print("Switch port was not updated.")
+                        continue
+
+            updated_switch_port = {
+                "switch_name": switch_port["switch_name"],
+                "port_id": switch_port["port_id"],
+                "description": description if description else switch_port["description"],
+                "mode": switch_port["mode"],
+                "connected_device": connected_device if connected_device else switch_port["connected_device"],
+                "poe_enabled": poe_enabled,
+                "access_vlan": access_vlan,
+                "native_vlan": native_vlan,
+                "allowed_vlans": allowed_vlans,
+                "assigned_vlan": assigned_vlan,
+                "notes": notes if notes else switch_port["notes"]
+            }
+
+            edit_switch_port(
+                switch_port["switch_name"],
+                switch_port["port_id"],
+                updated_switch_port
+            )
+
+        elif choice == "4":
+            switch_port_identity = get_switch_port_identity_to_delete()
+
+            if switch_port_identity is None:
+                continue
+
+            switch_name, port_id = switch_port_identity
+            delete_switch_port(switch_name, port_id)
+
+        elif choice == "5":
+            break
+
+        else:
+            print("Invalid option. Please try again.")
+
+
 # -------------------------
 # Main app loop
 # -------------------------
@@ -916,15 +1238,18 @@ def main():
             firewall_menu()
 
         elif choice == "4":
-            show_traffic_summary()
+            switch_port_menu()
 
         elif choice == "5":
-            generate_markdown_report()
+            show_traffic_summary()
 
         elif choice == "6":
-            run_integrity_check()
+            generate_markdown_report()
 
         elif choice == "7":
+            run_integrity_check()
+
+        elif choice == "8":
             print("Exiting SentinelMap.")
             break
 
