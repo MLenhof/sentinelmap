@@ -10,6 +10,9 @@ REPORT_FILE = Path("reports/network_report.md")
 
 
 def get_vlan_name(vlans, vlan_id):
+    if vlan_id in ["internet", "any"]:
+        return vlan_id
+
     for vlan in vlans:
         if vlan["vlan_id"] == vlan_id:
             return vlan["name"]
@@ -75,8 +78,16 @@ def generate_markdown_report():
                 source_name = get_vlan_name(vlans, rule["source_vlan"])
                 destination_name = get_vlan_name(vlans, rule["destination_vlan"])
 
-                file.write(f"- Source VLAN: {rule['source_vlan']} - {source_name}\n")
-                file.write(f"- Destination VLAN: {rule['destination_vlan']} - {destination_name}\n")
+                if rule["source_vlan"] in ["internet", "any"]:
+                    file.write(f"- Source: {rule['source_vlan']}\n")
+                else:
+                    file.write(f"- Source VLAN: {rule['source_vlan']} - {source_name}\n")
+
+                if rule["destination_vlan"] in ["internet", "any"]:
+                    file.write(f"- Destination: {rule['destination_vlan']}\n")
+                else:
+                    file.write(f"- Destination VLAN: {rule['destination_vlan']} - {destination_name}\n")
+
                 file.write(f"- Protocol: {rule['protocol']}\n")
                 file.write(f"- Port: {rule['port']}\n")
                 file.write(f"- Action: {rule['action']}\n")

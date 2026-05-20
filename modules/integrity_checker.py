@@ -154,11 +154,19 @@ def run_integrity_check():
 
         # Check if device IP equals gateway
         if device["ip_address"] == vlan["gateway"]:
-            warnings.append(
-                f"[WARNING] Device '{device['hostname']}' "
-                f"uses the VLAN gateway IP "
-                f"{vlan['gateway']}"
-            )
+
+            allowed_gateway_types = [
+                "firewall",
+                "router",
+                "gateway"
+            ]
+
+            if device["device_type"].lower() not in allowed_gateway_types:
+                warnings.append(
+                    f"[WARNING] Device '{device['hostname']}' "
+                    f"uses the VLAN gateway IP "
+                    f"{vlan['gateway']}"
+                )
 
         # Check for duplicate IPs
         if device["ip_address"] not in used_ips:
@@ -198,30 +206,43 @@ def run_integrity_check():
     # Firewall Rule Checks
     # -------------------------
 
+    valid_special_endpoints = ["internet", "any"]
+
     for rule in rules:
 
-        if rule["source_vlan"] not in vlan_lookup:
-            warnings.append(
-                f"[WARNING] Firewall Rule "
-                f"{rule['rule_id']} references "
-                f"missing source VLAN "
-                f"{rule['source_vlan']}"
-            )
+        for rule in rules:
 
-        if rule["destination_vlan"] not in vlan_lookup:
-            warnings.append(
-                f"[WARNING] Firewall Rule "
-                f"{rule['rule_id']} references "
-                f"missing destination VLAN "
-                f"{rule['destination_vlan']}"
-            )
+            source = rule["source_vlan"]
+            destination = rule["destination_vlan"]
 
-        if rule["source_vlan"] == rule["destination_vlan"]:
-            warnings.append(
-                f"[WARNING] Firewall Rule "
-                f"{rule['rule_id']} has identical "
-                f"source/destination VLANs"
-            )
+            if (
+                source not in vlan_lookup
+                and source not in valid_special_endpoints
+            ):
+                warnings.append(
+                    f"[WARNING] Firewall Rule "
+                    f"{rule['rule_id']} references "
+                    f"missing source VLAN "
+                    f"{source}"
+                )
+
+            if (
+                destination not in vlan_lookup
+                and destination not in valid_special_endpoints
+            ):
+                warnings.append(
+                    f"[WARNING] Firewall Rule "
+                    f"{rule['rule_id']} references "
+                    f"missing destination VLAN "
+                    f"{destination}"
+                )
+
+            if source == destination:
+                warnings.append(
+                    f"[WARNING] Firewall Rule "
+                    f"{rule['rule_id']} has identical "
+                    f"source/destination endpoints"
+                )
 
     # -------------------------
     # Output Results

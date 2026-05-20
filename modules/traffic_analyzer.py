@@ -3,6 +3,9 @@ from modules.firewall_manager import load_firewall_rules
 
 
 def get_vlan_name(vlans, vlan_id):
+    if vlan_id in ["internet", "any"]:
+        return vlan_id
+    
     for vlan in vlans:
         if vlan["vlan_id"] == vlan_id:
             return vlan["name"]

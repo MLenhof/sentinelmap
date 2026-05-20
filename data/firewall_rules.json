@@ -4,17 +4,620 @@
         "source_vlan": 10,
         "destination_vlan": 20,
         "protocol": "TCP",
-        "port": "443",
+        "port": "8006",
         "action": "allow",
-        "purpose": "Allow admin workstation access to server management interfaces"
+        "purpose": "Proxmox web management"
     },
     {
         "rule_id": 2,
+        "source_vlan": 10,
+        "destination_vlan": 20,
+        "protocol": "TCP",
+        "port": "22",
+        "action": "allow",
+        "purpose": "SSH management access"
+    },
+    {
+        "rule_id": 3,
+        "source_vlan": 10,
+        "destination_vlan": 20,
+        "protocol": "TCP",
+        "port": "443",
+        "action": "allow",
+        "purpose": "HTTPS management access"
+    },
+    {
+        "rule_id": 4,
+        "source_vlan": 10,
+        "destination_vlan": 30,
+        "protocol": "TCP",
+        "port": "22",
+        "action": "allow",
+        "purpose": "Administrative SSH access"
+    },
+    {
+        "rule_id": 5,
+        "source_vlan": 10,
+        "destination_vlan": 30,
+        "protocol": "TCP",
+        "port": "443",
+        "action": "allow",
+        "purpose": "Administrative HTTPS access"
+    },
+    {
+        "rule_id": 6,
+        "source_vlan": 10,
+        "destination_vlan": 40,
+        "protocol": "TCP",
+        "port": "22",
+        "action": "allow",
+        "purpose": "Wireless infrastructure SSH management"
+    },
+    {
+        "rule_id": 7,
+        "source_vlan": 10,
+        "destination_vlan": 40,
+        "protocol": "TCP",
+        "port": "443",
+        "action": "allow",
+        "purpose": "Wireless infrastructure HTTPS management"
+    },
+    {
+        "rule_id": 8,
+        "source_vlan": 10,
+        "destination_vlan": 50,
+        "protocol": "TCP",
+        "port": "443",
+        "action": "allow",
+        "purpose": "IoT device web management if required"
+    },
+    {
+        "rule_id": 9,
+        "source_vlan": 10,
+        "destination_vlan": 60,
+        "protocol": "TCP",
+        "port": "22",
+        "action": "allow",
+        "purpose": "Security infrastructure SSH management"
+    },
+    {
+        "rule_id": 10,
+        "source_vlan": 10,
+        "destination_vlan": 60,
+        "protocol": "TCP",
+        "port": "443",
+        "action": "allow",
+        "purpose": "Security infrastructure HTTPS management"
+    },
+    {
+        "rule_id": 11,
+        "source_vlan": 10,
+        "destination_vlan": 70,
+        "protocol": "TCP",
+        "port": "22",
+        "action": "allow",
+        "purpose": "DICOM infrastructure SSH management"
+    },
+    {
+        "rule_id": 12,
+        "source_vlan": 10,
+        "destination_vlan": 70,
+        "protocol": "TCP",
+        "port": "443",
+        "action": "allow",
+        "purpose": "DICOM infrastructure HTTPS management"
+    },
+    {
+        "rule_id": 13,
+        "source_vlan": 20,
+        "destination_vlan": 10,
+        "protocol": "ANY",
+        "port": "any",
+        "action": "deny",
+        "purpose": "Servers should not initiate management access"
+    },
+    {
+        "rule_id": 14,
+        "source_vlan": 20,
+        "destination_vlan": 30,
+        "protocol": "TCP",
+        "port": "53",
+        "action": "allow",
+        "purpose": "DNS services to clients"
+    },
+    {
+        "rule_id": 15,
+        "source_vlan": 20,
+        "destination_vlan": 30,
+        "protocol": "UDP",
+        "port": "53",
+        "action": "allow",
+        "purpose": "DNS services to clients"
+    },
+    {
+        "rule_id": 16,
+        "source_vlan": 20,
+        "destination_vlan": 30,
+        "protocol": "UDP",
+        "port": "123",
+        "action": "allow",
+        "purpose": "NTP services to clients"
+    },
+    {
+        "rule_id": 17,
+        "source_vlan": 20,
+        "destination_vlan": 40,
+        "protocol": "TCP",
+        "port": "53",
+        "action": "allow",
+        "purpose": "DNS services for WLAN clients"
+    },
+    {
+        "rule_id": 18,
+        "source_vlan": 20,
+        "destination_vlan": 40,
+        "protocol": "UDP",
+        "port": "53",
+        "action": "allow",
+        "purpose": "DNS services for WLAN clients"
+    },
+    {
+        "rule_id": 19,
+        "source_vlan": 20,
+        "destination_vlan": 40,
+        "protocol": "UDP",
+        "port": "123",
+        "action": "allow",
+        "purpose": "NTP services for WLAN clients"
+    },
+    {
+        "rule_id": 20,
+        "source_vlan": 20,
+        "destination_vlan": 50,
+        "protocol": "TCP",
+        "port": "53",
+        "action": "allow",
+        "purpose": "DNS services for IoT devices"
+    },
+    {
+        "rule_id": 21,
+        "source_vlan": 20,
+        "destination_vlan": 50,
+        "protocol": "UDP",
+        "port": "53",
+        "action": "allow",
+        "purpose": "DNS services for IoT devices"
+    },
+    {
+        "rule_id": 22,
+        "source_vlan": 20,
+        "destination_vlan": 50,
+        "protocol": "UDP",
+        "port": "123",
+        "action": "allow",
+        "purpose": "NTP services for IoT devices"
+    },
+    {
+        "rule_id": 23,
+        "source_vlan": 20,
+        "destination_vlan": 70,
+        "protocol": "TCP",
+        "port": "104",
+        "action": "allow",
+        "purpose": "DICOM communications"
+    },
+    {
+        "rule_id": 24,
         "source_vlan": 30,
         "destination_vlan": 10,
         "protocol": "ANY",
         "port": "any",
         "action": "deny",
-        "purpose": "Block client access to management network"
+        "purpose": "Clients should not access management infrastructure"
+    },
+    {
+        "rule_id": 25,
+        "source_vlan": 30,
+        "destination_vlan": 20,
+        "protocol": "TCP",
+        "port": "53",
+        "action": "allow",
+        "purpose": "DNS queries"
+    },
+    {
+        "rule_id": 26,
+        "source_vlan": 30,
+        "destination_vlan": 20,
+        "protocol": "UDP",
+        "port": "53",
+        "action": "allow",
+        "purpose": "DNS queries"
+    },
+    {
+        "rule_id": 27,
+        "source_vlan": 30,
+        "destination_vlan": 20,
+        "protocol": "UDP",
+        "port": "123",
+        "action": "allow",
+        "purpose": "NTP synchronization"
+    },
+    {
+        "rule_id": 28,
+        "source_vlan": 40,
+        "destination_vlan": 10,
+        "protocol": "ANY",
+        "port": "any",
+        "action": "deny",
+        "purpose": "Wireless clients should not access management infrastructure"
+    },
+    {
+        "rule_id": 29,
+        "source_vlan": 40,
+        "destination_vlan": 20,
+        "protocol": "TCP",
+        "port": "53",
+        "action": "allow",
+        "purpose": "DNS queries"
+    },
+    {
+        "rule_id": 30,
+        "source_vlan": 40,
+        "destination_vlan": 20,
+        "protocol": "UDP",
+        "port": "53",
+        "action": "allow",
+        "purpose": "DNS queries"
+    },
+    {
+        "rule_id": 31,
+        "source_vlan": 40,
+        "destination_vlan": 20,
+        "protocol": "UDP",
+        "port": "123",
+        "action": "allow",
+        "purpose": "NTP synchronization"
+    },
+    {
+        "rule_id": 32,
+        "source_vlan": 40,
+        "destination_vlan": 20,
+        "protocol": "TCP",
+        "port": "443",
+        "action": "allow",
+        "purpose": "Secure web access to approved internal services"
+    },
+    {
+        "rule_id": 33,
+        "source_vlan": 50,
+        "destination_vlan": 10,
+        "protocol": "ANY",
+        "port": "any",
+        "action": "deny",
+        "purpose": "IoT devices should not access management infrastructure"
+    },
+    {
+        "rule_id": 34,
+        "source_vlan": 50,
+        "destination_vlan": 20,
+        "protocol": "TCP",
+        "port": "53",
+        "action": "allow",
+        "purpose": "DNS queries"
+    },
+    {
+        "rule_id": 35,
+        "source_vlan": 50,
+        "destination_vlan": 20,
+        "protocol": "UDP",
+        "port": "53",
+        "action": "allow",
+        "purpose": "DNS queries"
+    },
+    {
+        "rule_id": 36,
+        "source_vlan": 50,
+        "destination_vlan": 20,
+        "protocol": "UDP",
+        "port": "123",
+        "action": "allow",
+        "purpose": "NTP synchronization"
+    },
+    {
+        "rule_id": 37,
+        "source_vlan": 50,
+        "destination_vlan": 30,
+        "protocol": "ANY",
+        "port": "any",
+        "action": "deny",
+        "purpose": "Prevent IoT lateral movement to client systems"
+    },
+    {
+        "rule_id": 38,
+        "source_vlan": 50,
+        "destination_vlan": 40,
+        "protocol": "ANY",
+        "port": "any",
+        "action": "deny",
+        "purpose": "Prevent IoT lateral movement to WLAN devices"
+    },
+    {
+        "rule_id": 39,
+        "source_vlan": 50,
+        "destination_vlan": 60,
+        "protocol": "ANY",
+        "port": "any",
+        "action": "deny",
+        "purpose": "Prevent IoT access to security tooling"
+    },
+    {
+        "rule_id": 40,
+        "source_vlan": 50,
+        "destination_vlan": 70,
+        "protocol": "ANY",
+        "port": "any",
+        "action": "deny",
+        "purpose": "Prevent IoT access to DICOM systems"
+    },
+    {
+        "rule_id": 41,
+        "source_vlan": 60,
+        "destination_vlan": 10,
+        "protocol": "ICMP",
+        "port": "any",
+        "action": "allow",
+        "purpose": "Monitoring and reachability testing"
+    },
+    {
+        "rule_id": 42,
+        "source_vlan": 60,
+        "destination_vlan": 10,
+        "protocol": "UDP",
+        "port": "514",
+        "action": "allow",
+        "purpose": "Syslog collection"
+    },
+    {
+        "rule_id": 43,
+        "source_vlan": 60,
+        "destination_vlan": 10,
+        "protocol": "UDP",
+        "port": "161",
+        "action": "allow",
+        "purpose": "SNMP monitoring"
+    },
+    {
+        "rule_id": 44,
+        "source_vlan": 60,
+        "destination_vlan": 20,
+        "protocol": "ICMP",
+        "port": "any",
+        "action": "allow",
+        "purpose": "Monitoring and reachability testing"
+    },
+    {
+        "rule_id": 45,
+        "source_vlan": 60,
+        "destination_vlan": 20,
+        "protocol": "UDP",
+        "port": "514",
+        "action": "allow",
+        "purpose": "Syslog collection"
+    },
+    {
+        "rule_id": 46,
+        "source_vlan": 60,
+        "destination_vlan": 20,
+        "protocol": "UDP",
+        "port": "161",
+        "action": "allow",
+        "purpose": "SNMP monitoring"
+    },
+    {
+        "rule_id": 47,
+        "source_vlan": 60,
+        "destination_vlan": 30,
+        "protocol": "ICMP",
+        "port": "any",
+        "action": "allow",
+        "purpose": "Monitoring and reachability testing"
+    },
+    {
+        "rule_id": 48,
+        "source_vlan": 60,
+        "destination_vlan": 30,
+        "protocol": "UDP",
+        "port": "514",
+        "action": "allow",
+        "purpose": "Syslog collection"
+    },
+    {
+        "rule_id": 49,
+        "source_vlan": 60,
+        "destination_vlan": 30,
+        "protocol": "UDP",
+        "port": "161",
+        "action": "allow",
+        "purpose": "SNMP monitoring"
+    },
+    {
+        "rule_id": 50,
+        "source_vlan": 60,
+        "destination_vlan": 40,
+        "protocol": "ICMP",
+        "port": "any",
+        "action": "allow",
+        "purpose": "Monitoring and reachability testing"
+    },
+    {
+        "rule_id": 51,
+        "source_vlan": 60,
+        "destination_vlan": 40,
+        "protocol": "UDP",
+        "port": "514",
+        "action": "allow",
+        "purpose": "Syslog collection"
+    },
+    {
+        "rule_id": 52,
+        "source_vlan": 60,
+        "destination_vlan": 40,
+        "protocol": "UDP",
+        "port": "161",
+        "action": "allow",
+        "purpose": "SNMP monitoring"
+    },
+    {
+        "rule_id": 53,
+        "source_vlan": 60,
+        "destination_vlan": 50,
+        "protocol": "ICMP",
+        "port": "any",
+        "action": "allow",
+        "purpose": "Monitoring and reachability testing"
+    },
+    {
+        "rule_id": 54,
+        "source_vlan": 60,
+        "destination_vlan": 50,
+        "protocol": "UDP",
+        "port": "514",
+        "action": "allow",
+        "purpose": "Syslog collection"
+    },
+    {
+        "rule_id": 55,
+        "source_vlan": 60,
+        "destination_vlan": 50,
+        "protocol": "UDP",
+        "port": "161",
+        "action": "allow",
+        "purpose": "SNMP monitoring"
+    },
+    {
+        "rule_id": 56,
+        "source_vlan": 60,
+        "destination_vlan": 70,
+        "protocol": "ICMP",
+        "port": "any",
+        "action": "allow",
+        "purpose": "Monitoring and reachability testing"
+    },
+    {
+        "rule_id": 57,
+        "source_vlan": 60,
+        "destination_vlan": 70,
+        "protocol": "UDP",
+        "port": "514",
+        "action": "allow",
+        "purpose": "Syslog collection"
+    },
+    {
+        "rule_id": 58,
+        "source_vlan": 60,
+        "destination_vlan": 70,
+        "protocol": "UDP",
+        "port": "161",
+        "action": "allow",
+        "purpose": "SNMP monitoring"
+    },
+    {
+        "rule_id": 59,
+        "source_vlan": 70,
+        "destination_vlan": 10,
+        "protocol": "ANY",
+        "port": "any",
+        "action": "deny",
+        "purpose": "DICOM systems should not access management infrastructure"
+    },
+    {
+        "rule_id": 60,
+        "source_vlan": 70,
+        "destination_vlan": 20,
+        "protocol": "TCP",
+        "port": "104",
+        "action": "allow",
+        "purpose": "Standard DICOM communications"
+    },
+    {
+        "rule_id": 61,
+        "source_vlan": 70,
+        "destination_vlan": 20,
+        "protocol": "TCP",
+        "port": "8042",
+        "action": "allow",
+        "purpose": "Orthanc web/API access"
+    },
+    {
+        "rule_id": 62,
+        "source_vlan": 70,
+        "destination_vlan": 30,
+        "protocol": "ANY",
+        "port": "any",
+        "action": "deny",
+        "purpose": "DICOM systems should not access client systems"
+    },
+    {
+        "rule_id": 63,
+        "source_vlan": 70,
+        "destination_vlan": 40,
+        "protocol": "ANY",
+        "port": "any",
+        "action": "deny",
+        "purpose": "DICOM systems should not access WLAN systems"
+    },
+    {
+        "rule_id": 64,
+        "source_vlan": 70,
+        "destination_vlan": 50,
+        "protocol": "ANY",
+        "port": "any",
+        "action": "deny",
+        "purpose": "DICOM systems should not access IoT systems"
+    },
+    {
+        "rule_id": 65,
+        "source_vlan": 70,
+        "destination_vlan": 60,
+        "protocol": "ANY",
+        "port": "any",
+        "action": "deny",
+        "purpose": "DICOM systems should not access security tooling"
+    },
+    {
+        "rule_id": 66,
+        "source_vlan": 20,
+        "destination_vlan": "internet",
+        "protocol": "TCP",
+        "port": "443",
+        "action": "allow",
+        "purpose": "Secure outbound internet access for servers"
+    },
+    {
+        "rule_id": 67,
+        "source_vlan": 30,
+        "destination_vlan": "internet",
+        "protocol": "TCP",
+        "port": "443",
+        "action": "allow",
+        "purpose": "Secure outbound internet access for clients"
+    },
+    {
+        "rule_id": 68,
+        "source_vlan": 40,
+        "destination_vlan": "internet",
+        "protocol": "TCP",
+        "port": "443",
+        "action": "allow",
+        "purpose": "Secure outbound internet access for WLAN clients"
+    },
+    {
+        "rule_id": 69,
+        "source_vlan": 50,
+        "destination_vlan": "internet",
+        "protocol": "TCP",
+        "port": "443",
+        "action": "allow",
+        "purpose": "Secure outbound internet access for IoT devices"
     }
 ]

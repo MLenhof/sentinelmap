@@ -215,7 +215,7 @@ def get_gateway_for_subnet(subnet_value):
         return gateway
 
 
-def get_ip_address_for_vlan(vlan):
+def get_ip_address_for_vlan(vlan, device_type):
     subnet = ipaddress.ip_network(vlan["subnet"], strict=False)
     devices = load_devices()
 
@@ -242,8 +242,19 @@ def get_ip_address_for_vlan(vlan):
                 continue
 
             if ip_input == vlan["gateway"]:
-                print("Invalid IP. That address is already used as the VLAN gateway.")
-                continue
+
+                allowed_gateway_types = [
+                    "firewall",
+                    "router",
+                    "gateway"
+                ]
+
+                if device_type.lower() not in allowed_gateway_types:
+                    print(
+                        "Invalid IP. That address is already "
+                        "used as the VLAN gateway."
+                    )
+                    continue
 
             ip_already_used = False
 
@@ -317,6 +328,28 @@ def get_firewall_action():
             return action
 
         print("Invalid action. Please enter 'allow' or 'deny'.")
+
+
+def get_firewall_endpoint(label):
+    while True:
+        user_input = input(
+            f"{label} VLAN ID, 'internet', or 'any': "
+        ).lower()
+
+        if user_input in ["internet", "any"]:
+            return user_input
+
+        try:
+            vlan_id = int(user_input)
+
+            if vlan_exists(vlan_id):
+                return vlan_id
+
+            print(f"VLAN {vlan_id} does not exist.")
+            list_vlan_summary()
+
+        except ValueError:
+            print("Invalid input. Enter a VLAN ID, 'internet', or 'any'.")
 
 
 def select_firewall_rule():
@@ -624,7 +657,10 @@ def device_menu():
                 continue
 
             vlan = get_vlan_by_id(vlan_id)
-            ip_address = get_ip_address_for_vlan(vlan)
+            ip_address = get_ip_address_for_vlan(
+                    vlan,
+                    device_type
+                )
 
             location = input("Location (example: rack, office, Proxmox host, virtual): ")
             role = input("Role (what does this device do?): ")
@@ -673,7 +709,10 @@ def device_menu():
             change_ip = input("Change IP address? (y/n): ").lower()
 
             if change_ip == "y":
-                ip_address = get_ip_address_for_vlan(vlan)
+                ip_address = get_ip_address_for_vlan(
+                    vlan,
+                    device_type
+                )
             else:
                 ip_address = device["ip_address"]
 
@@ -717,14 +756,14 @@ def firewall_menu():
         if choice == "1":
             print("\nAdd Firewall Rule")
             print("Source VLAN = where traffic starts")
-            source_vlan = get_existing_vlan_id()
+            source_vlan = get_firewall_endpoint("Source")
 
             if source_vlan is None:
                 print("Firewall rule was not added.")
                 continue
 
             print("\nDestination VLAN = where traffic is going")
-            destination_vlan = get_existing_vlan_id()
+            destination_vlan = get_firewall_endpoint("Destination")
 
             if destination_vlan is None:
                 print("Firewall rule was not added.")
@@ -776,7 +815,7 @@ def firewall_menu():
             change_source = input("Change source VLAN? (y/n): ").lower()
 
             if change_source == "y":
-                source_vlan = get_existing_vlan_id()
+                source_vlan = get_firewall_endpoint("Source")
 
                 if source_vlan is None:
                     print("Firewall rule was not updated.")
@@ -788,7 +827,7 @@ def firewall_menu():
             change_destination = input("Change destination VLAN? (y/n): ").lower()
 
             if change_destination == "y":
-                destination_vlan = get_existing_vlan_id()
+                destination_vlan = get_firewall_endpoint("Destination")
 
                 if destination_vlan is None:
                     print("Firewall rule was not updated.")

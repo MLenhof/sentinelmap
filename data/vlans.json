@@ -4,23 +4,63 @@
         "name": "Management",
         "subnet": "10.10.10.0/24",
         "gateway": "10.10.10.1",
-        "purpose": "Infrastructure management",
-        "security_notes": "Admin access only"
+        "purpose": "Infrastrucutre management",
+        "security_notes": "Restricted to trusted admin systems only. No general user or IoT access."
     },
     {
         "vlan_id": 20,
-        "name": "Servers",
+        "name": "Server",
         "subnet": "10.10.20.0/24",
         "gateway": "10.10.20.1",
-        "purpose": "Server and infrastructure services",
-        "security_notes": "Limited access from trusted VLANs"
+        "purpose": "Proxmox servers + infrastructure VMs",
+        "security_notes": "Limited access from management VLAN and approved services only."
     },
     {
         "vlan_id": 30,
-        "name": "Clients",
+        "name": "Client",
         "subnet": "10.10.30.0/24",
         "gateway": "10.10.30.1",
-        "purpose": "User endpoint devices",
-        "security_notes": "Restricted access to management networks"
+        "purpose": "User endpoints",
+        "security_notes": "User devices should not directly access management infrastructure."
+    },
+    {
+        "vlan_id": 40,
+        "name": "WLAN",
+        "subnet": "10.10.40.0/24",
+        "gateway": "10.10.40.1",
+        "purpose": "Wireless clients",
+        "security_notes": "Wireless clients should have restricted east-west access and limited infrastructure access."
+    },
+    {
+        "vlan_id": 50,
+        "name": "IoT",
+        "subnet": "10.10.50.0/24",
+        "gateway": "10.10.50.1",
+        "purpose": "Future IoT/untrusted devices",
+        "security_notes": "Untrusted devices. Internet access only where possible. Block access to management and servers by default."
+    },
+    {
+        "vlan_id": 60,
+        "name": "SECURITY",
+        "subnet": "10.10.60.0/24",
+        "gateway": "10.10.60.1",
+        "purpose": "Monitoring/SIEM",
+        "security_notes": "Restricted to monitoring, logging, and security tooling. Highly trusted VLAN."
+    },
+    {
+        "vlan_id": 70,
+        "name": "DICOM",
+        "subnet": "10.10.70.0/24",
+        "gateway": "10.10.70.1",
+        "purpose": "PACS/imaging/testing",
+        "security_notes": "Restricted to imaging systems, PACS testing, and approved DICOM communication paths only."
+    },
+    {
+        "vlan_id": 90,
+        "name": "BLACKHOLE",
+        "subnet": "10.10.90.0/24",
+        "gateway": "10.10.90.1",
+        "purpose": "Native/unused VLAN",
+        "security_notes": "Unused/native VLAN. Should not carry user traffic. Restrict access and avoid device assignment."
     }
 ]

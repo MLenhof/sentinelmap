@@ -1,20 +1,65 @@
 [
     {
-        "hostname": "admin-ws-01",
-        "device_type": "client",
-        "ip_address": "10.10.10.10",
+        "hostname": "pfsense-fw",
+        "device_type": "firewall",
+        "ip_address": "10.10.10.1",
         "vlan_id": 10,
-        "location": "office",
-        "role": "Administrative workstation",
-        "notes": "Used for managing lab infrastructure"
+        "location": "under stairs",
+        "role": "Inter-VLAN routing, firewall enforcement, and default gateway services",
+        "notes": "VLAN gateway/firewall/router"
     },
     {
-        "hostname": "proxmox-01",
-        "device_type": "server",
+        "hostname": "sl-pve-01",
+        "device_type": "proxmox host",
         "ip_address": "10.10.20.10",
         "vlan_id": 20,
-        "location": "lab rack",
-        "role": "Virtualization host",
-        "notes": "Hosts infrastructure VMs"
+        "location": "Desk",
+        "role": "Primary virtualization host for SentinelLab workloads",
+        "notes": "Virtualization host"
+    },
+    {
+        "hostname": "sl-pve-02",
+        "device_type": "Proxmox host",
+        "ip_address": "10.10.20.11",
+        "vlan_id": 20,
+        "location": "under stairs",
+        "role": "Secondary virtualization host for SentinelLab workloads",
+        "notes": "Virtualization host"
+    },
+    {
+        "hostname": "sl-ap-01",
+        "device_type": "access point",
+        "ip_address": "10.10.10.20",
+        "vlan_id": 10,
+        "location": "under stairs",
+        "role": "Provides wireless access for lab WLAN/SSID traffic",
+        "notes": "Aruba AP management IP"
+    },
+    {
+        "hostname": "sl-img-01",
+        "device_type": "imaging workstation",
+        "ip_address": "10.10.70.10",
+        "vlan_id": 70,
+        "location": "under stairs",
+        "role": "ImageView/DICOM test workstation for imaging workflow simulations",
+        "notes": "ImageView/DICOM testing workstation"
+    },
+    {
+        "hostname": "sl-cli-01",
+        "device_type": "client",
+        "ip_address": "10.10.30.10",
+        "vlan_id": 30,
+        "location": "under stairs",
+        "role": "General client endpoint for testing user VLAN behavior",
+        "notes": "General client endpoint"
+    },
+    {
+        "hostname": "admin-laptop",
+        "device_type": "admin workstation",
+        "ip_address": "10.10.10.10",
+        "vlan_id": 10,
+        "location": "mobile",
+        "role": "Trusted administration device for configuring lab infrastructure",
+        "notes": "Admin/configuration device"
     }
 ]
