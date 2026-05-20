@@ -1,0 +1,26 @@
+[
+    {
+        "vlan_id": 10,
+        "name": "Management",
+        "subnet": "10.10.10.0/24",
+        "gateway": "10.10.10.1",
+        "purpose": "Infrastructure management",
+        "security_notes": "Admin access only"
+    },
+    {
+        "vlan_id": 20,
+        "name": "Servers",
+        "subnet": "10.10.20.0/24",
+        "gateway": "10.10.20.1",
+        "purpose": "Server and infrastructure services",
+        "security_notes": "Limited access from trusted VLANs"
+    },
+    {
+        "vlan_id": 30,
+        "name": "Clients",
+        "subnet": "10.10.30.0/24",
+        "gateway": "10.10.30.1",
+        "purpose": "User endpoint devices",
+        "security_notes": "Restricted access to management networks"
+    }
+]

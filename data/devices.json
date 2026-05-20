@@ -1,0 +1,20 @@
+[
+    {
+        "hostname": "admin-ws-01",
+        "device_type": "client",
+        "ip_address": "10.10.10.10",
+        "vlan_id": 10,
+        "location": "office",
+        "role": "Administrative workstation",
+        "notes": "Used for managing lab infrastructure"
+    },
+    {
+        "hostname": "proxmox-01",
+        "device_type": "server",
+        "ip_address": "10.10.20.10",
+        "vlan_id": 20,
+        "location": "lab rack",
+        "role": "Virtualization host",
+        "notes": "Hosts infrastructure VMs"
+    }
+]

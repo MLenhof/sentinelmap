@@ -1,0 +1,20 @@
+[
+    {
+        "rule_id": 1,
+        "source_vlan": 10,
+        "destination_vlan": 20,
+        "protocol": "TCP",
+        "port": "443",
+        "action": "allow",
+        "purpose": "Allow admin workstation access to server management interfaces"
+    },
+    {
+        "rule_id": 2,
+        "source_vlan": 30,
+        "destination_vlan": 10,
+        "protocol": "ANY",
+        "port": "any",
+        "action": "deny",
+        "purpose": "Block client access to management network"
+    }
+]
