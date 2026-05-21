@@ -14,6 +14,8 @@ SentinelMap was created as part of the SentinelLab homelab project to improve un
 - infrastructure validation
 - enterprise troubleshooting concepts
 
+SentinelMap is evolving from a documentation utility into an infrastructure reasoning engine capable of validating relationships between VLANs, devices, switch ports, firewall rules, and traffic paths.
+
 ---
 
 # Current Features
@@ -45,6 +47,17 @@ SentinelMap was created as part of the SentinelLab homelab project to improve un
 - Prevent duplicate firewall rules
 - Prevent invalid source/destination relationships
 
+## Switch Port Management
+- Add switch ports
+- List switch ports
+- Edit switch ports
+- Delete switch ports
+- Model access/trunk/unused ports
+- Validate VLAN references
+- Validate switch port relationships
+- Detect duplicate switch port assignments
+- Detect unknown connected devices
+
 ## Traffic Analysis
 - Show “what can talk to what” summaries
 - Display inter-VLAN traffic relationships
@@ -52,10 +65,13 @@ SentinelMap was created as part of the SentinelLab homelab project to improve un
 
 ## Reporting
 - Generate Markdown infrastructure reports
+- Include integrity validation summaries
 - Include VLAN summaries
 - Include device summaries
 - Include firewall summaries
 - Include traffic summaries
+- Include switch port summaries
+- Include physical topology summaries
 - Include report timestamps
 
 ## Integrity Checking
@@ -67,6 +83,11 @@ SentinelMap was created as part of the SentinelLab homelab project to improve un
 - Detect invalid firewall rule references
 - Detect invalid subnet relationships
 - Detect invalid gateway assignments
+- Detect unknown switch-connected devices
+- Detect devices without switch connectivity
+- Detect duplicate switch port assignments
+- Validate switch port VLAN references
+- Validate access/trunk port configurations
 
 ---
 
@@ -80,12 +101,14 @@ sentinelmap/
 ├── data/
 │   ├── vlans.json
 │   ├── devices.json
-│   └── firewall_rules.json
+│   ├── firewall_rules.json
+│   └── switch_ports.json
 │
 ├── modules/
 │   ├── vlan_manager.py
 │   ├── device_manager.py
 │   ├── firewall_manager.py
+│   ├── switch_port_manager.py
 │   ├── traffic_analyzer.py
 │   ├── report_generator.py
 │   └── integrity_checker.py
@@ -137,9 +160,10 @@ python main.py
 1. Create VLANs
 2. Add devices to VLANs
 3. Create firewall rules between VLANs
-4. Generate traffic summaries
-5. Run integrity checks
-6. Generate Markdown documentation reports
+4. Document switch ports and topology
+5. Generate traffic summaries
+6. Run integrity checks
+7. Generate Markdown documentation reports
 
 ---
 
@@ -160,7 +184,6 @@ python main.py
 
 Potential future additions:
 
-- Switch port documentation
 - Proxmox host tracking
 - VM tracking
 - Wireless SSID modeling
@@ -175,6 +198,10 @@ Potential future additions:
 - Search functionality
 - Risk scoring
 - Compliance mapping
+- Device-to-device traffic path analysis
+- VLAN path reasoning
+- Route/path tracing
+- Topology graph generation
 
 ---
 
