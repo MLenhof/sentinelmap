@@ -4,7 +4,7 @@
         "port_id": "1",
         "description": "uplink to pfSense firewall/router",
         "mode": "trunk",
-        "connected_device": "netgate-1100",
+        "connected_device": "pfsense-fw",
         "poe_enabled": false,
         "access_vlan": null,
         "native_vlan": 90,

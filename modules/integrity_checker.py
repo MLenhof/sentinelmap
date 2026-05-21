@@ -6,7 +6,7 @@ from modules.firewall_manager import load_firewall_rules
 from modules.switch_port_manager import load_switch_ports
 
 
-def run_integrity_check():
+def get_integrity_warnings():
 
     vlans = load_vlans()
     devices = load_devices()
@@ -345,6 +345,105 @@ def run_integrity_check():
             )
 
     # -------------------------
+    # Device / Switch Port Cross-Reference Checks
+    # -------------------------
+
+    connected_devices = []
+
+    for port in switch_ports:
+        connected_device = port["connected_device"]
+
+        if connected_device:
+            normalized_device = connected_device.lower()
+
+            if normalized_device not in [
+                "none",
+                "n/a",
+                "spare",
+                "unused"
+            ]:
+                connected_devices.append(normalized_device)
+
+    for device in devices:
+        hostname = device["hostname"].lower()
+
+        if hostname not in connected_devices:
+            warnings.append(
+                f"[WARNING] Device {device['hostname']} exists in devices.json "
+                f"but is not connected to any documented switch port"
+            )
+
+    device_port_map = {}
+
+    for port in switch_ports:
+        connected_device = port["connected_device"]
+
+        if connected_device:
+            normalized_device = connected_device.lower()
+
+            if normalized_device not in [
+                "none",
+                "n/a",
+                "spare",
+                "unused"
+            ]:
+                if normalized_device not in device_port_map:
+                    device_port_map[normalized_device] = []
+
+                device_port_map[normalized_device].append(
+                    f"{port['switch_name']} port {port['port_id']}"
+                )
+
+    for device_name, ports in device_port_map.items():
+        if len(ports) > 1:
+            warnings.append(
+                f"[WARNING] Device {device_name} appears on multiple switch ports: "
+                f"{', '.join(ports)}"
+            )
+
+    for port in switch_ports:
+        connected_device = port["connected_device"]
+
+        if not connected_device:
+            continue
+
+        normalized_device = connected_device.lower()
+
+        if normalized_device in [
+            "none",
+            "n/a",
+            "spare",
+            "unused"
+        ]:
+            continue
+
+        if normalized_device not in device_lookup:
+            continue
+
+        device = device_lookup[normalized_device]
+
+        if "vlan_id" not in device:
+            continue
+
+        device_vlan = device["vlan_id"]
+
+        if port["mode"] == "access":
+            if port["access_vlan"] != device_vlan:
+                warnings.append(
+                    f"[WARNING] Access port {port['switch_name']} port {port['port_id']} "
+                    f"is assigned to VLAN {port['access_vlan']}, but connected device "
+                    f"{connected_device} is documented in VLAN {device_vlan}"
+                )
+
+        elif port["mode"] == "trunk":
+            if device_vlan not in port["allowed_vlans"]:
+                warnings.append(
+                    f"[WARNING] Trunk port {port['switch_name']} port {port['port_id']} "
+                    f"does not allow VLAN {device_vlan}, but connected device "
+                    f"{connected_device} is documented in VLAN {device_vlan}"
+                )
+
+    # -------------------------
     # Firewall Rule Checks
     # -------------------------
 
@@ -383,6 +482,12 @@ def run_integrity_check():
                 f"source/destination endpoints"
             )
 
+    return warnings
+
+
+def run_integrity_check():
+
+    warnings = get_integrity_warnings()
     # -------------------------
     # Output Results
     # -------------------------
