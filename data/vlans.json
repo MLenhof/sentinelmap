@@ -4,7 +4,7 @@
         "name": "Management",
         "subnet": "10.10.10.0/24",
         "gateway": "10.10.10.1",
-        "purpose": "Infrastrucutre management",
+        "purpose": "Infrastructure management",
         "security_notes": "Restricted to trusted admin systems only. No general user or IoT access."
     },
     {
