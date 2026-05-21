@@ -32,6 +32,7 @@ from modules.switch_port_manager import (
 from modules.traffic_analyzer import show_traffic_summary
 from modules.report_generator import generate_markdown_report
 from modules.integrity_checker import run_integrity_check
+from modules.traffic_path_analyzer import print_vlan_path_analysis
 import ipaddress
 
 
@@ -528,7 +529,6 @@ def get_new_hostname():
         return hostname
 
 
-
 def get_switch_port_mode():
     valid_modes = ["access", "trunk", "unused"]
 
@@ -652,7 +652,8 @@ def show_main_menu():
     print("5. Traffic Analysis")
     print("6. Reports")
     print("7. Data Integrity Check")
-    print("8. Exit")
+    print("8. Traffic Path Analysis")
+    print("9. Exit")
 
 
 def show_vlan_menu():
@@ -689,6 +690,27 @@ def show_switch_port_menu():
     print("3. Edit Switch Port")
     print("4. Delete Switch Port")
     print("5. Back")
+
+
+def traffic_path_menu():
+    while True:
+        print("\nTraffic Path Analysis")
+        print("1. Analyze VLAN-to-VLAN traffic")
+        print("2. Return to main menu")
+
+        choice = input("Choose an option: ").strip()
+
+        if choice == "1":
+            source_vlan_id = input("Source VLAN ID, internet, or any: ").strip()
+            destination_vlan_id = input("Destination VLAN ID, internet, or any: ").strip()
+
+            print_vlan_path_analysis(source_vlan_id, destination_vlan_id)
+
+        elif choice == "2":
+            break
+
+        else:
+            print("Invalid option. Please try again.")
 
 
 # -------------------------
@@ -1250,6 +1272,9 @@ def main():
             run_integrity_check()
 
         elif choice == "8":
+            traffic_path_menu()
+
+        elif choice == "9":
             print("Exiting SentinelMap.")
             break
 
