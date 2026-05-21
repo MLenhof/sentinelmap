@@ -29,10 +29,15 @@ from modules.switch_port_manager import (
     edit_switch_port,
     load_switch_ports
 )
+from modules.traffic_path_analyzer import (
+    print_vlan_path_analysis,
+    print_device_path_analysis,
+    print_known_devices,
+    find_device_by_hostname
+)
 from modules.traffic_analyzer import show_traffic_summary
 from modules.report_generator import generate_markdown_report
 from modules.integrity_checker import run_integrity_check
-from modules.traffic_path_analyzer import print_vlan_path_analysis
 import ipaddress
 
 
@@ -639,6 +644,15 @@ def get_switch_port_identity_to_delete():
     return switch_port["switch_name"], switch_port["port_id"]
 
 
+def print_known_devices():
+    devices = load_devices()
+
+    print("\nKnown Devices")
+
+    for device in devices:
+        print(f"- {device['hostname']}")
+
+
 # -------------------------
 # Menu display functions
 # -------------------------
@@ -696,7 +710,8 @@ def traffic_path_menu():
     while True:
         print("\nTraffic Path Analysis")
         print("1. Analyze VLAN-to-VLAN traffic")
-        print("2. Return to main menu")
+        print("2. Analyze device-to-device traffic")
+        print("3. Return to main menu")
 
         choice = input("Choose an option: ").strip()
 
@@ -707,6 +722,30 @@ def traffic_path_menu():
             print_vlan_path_analysis(source_vlan_id, destination_vlan_id)
 
         elif choice == "2":
+            print_known_devices()
+
+            source_hostname = input("Source device hostname: ").strip()
+
+            source_device = find_device_by_hostname(source_hostname)
+
+            if source_device is None:
+                print("Error: Source device does not exist.")
+                continue
+
+            destination_hostname = input("Destination device hostname: ").strip()
+
+            destination_device = find_device_by_hostname(destination_hostname)
+
+            if destination_device is None:
+                print("Error: Destination device does not exist.")
+                continue
+
+            print_device_path_analysis(
+                source_hostname,
+                destination_hostname
+            )
+
+        elif choice == "3":
             break
 
         else:

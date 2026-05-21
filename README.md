@@ -16,6 +16,8 @@ SentinelMap was created as part of the SentinelLab homelab project to improve un
 
 SentinelMap is evolving from a documentation utility into an infrastructure reasoning engine capable of validating relationships between VLANs, devices, switch ports, firewall rules, and traffic paths.
 
+SentinelMap is evolving into an infrastructure reasoning engine capable of analyzing VLAN relationships, firewall policy intent, switch topology, device connectivity, and traffic paths.
+
 ---
 
 # Current Features
@@ -58,10 +60,14 @@ SentinelMap is evolving from a documentation utility into an infrastructure reas
 - Detect duplicate switch port assignments
 - Detect unknown connected devices
 
-## Traffic Analysis
-- Show “what can talk to what” summaries
-- Display inter-VLAN traffic relationships
-- Explain firewall intent through rule purposes
+## Traffic Path Analysis
+- Analyze VLAN-to-VLAN traffic paths
+- Analyze device-to-device traffic paths
+- Interpret firewall rule intent
+- Detect broad vs partial access
+- Support special endpoints like internet and any
+- Explain why traffic is allowed or denied
+- Display matching firewall rules
 
 ## Reporting
 - Generate Markdown infrastructure reports
@@ -73,6 +79,9 @@ SentinelMap is evolving from a documentation utility into an infrastructure reas
 - Include switch port summaries
 - Include physical topology summaries
 - Include report timestamps
+- Include physical topology summaries
+- Include integrity validation summaries
+- Include traffic path reasoning summaries
 
 ## Integrity Checking
 - Detect duplicate hostnames
@@ -88,6 +97,9 @@ SentinelMap is evolving from a documentation utility into an infrastructure reas
 - Detect duplicate switch port assignments
 - Validate switch port VLAN references
 - Validate access/trunk port configurations
+- Detect devices without switch connectivity
+- Detect unknown switch-connected devices
+- Detect invalid switch port relationships
 
 ---
 
@@ -198,7 +210,6 @@ Potential future additions:
 - Search functionality
 - Risk scoring
 - Compliance mapping
-- Device-to-device traffic path analysis
 - VLAN path reasoning
 - Route/path tracing
 - Topology graph generation
@@ -208,6 +219,8 @@ Potential future additions:
 # SentinelMap Philosophy
 
 SentinelMap is not intended to become a massive enterprise management platform.
+
+SentinelMap focuses on helping users understand not only what infrastructure exists, but how infrastructure components interact, communicate, and enforce segmentation boundaries.
 
 The purpose is to:
 
